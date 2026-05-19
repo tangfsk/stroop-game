@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stroop 顏色測試</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 20px;
+        }
+        .game-container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .subtitle {
+            color: #aaa;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        .score-board {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+        }
+        .score-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px 30px;
+            border-radius: 10px;
+        }
+        .score-item span {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .word-display {
+            font-size: 5rem;
+            font-weight: bold;
+            padding: 40px;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+        }
+        .word-display.shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+        .instructions {
+            color: #ff6b6b;
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        .btn {
+            padding: 20px 35px;
+            font-size: 1.3rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn-red { background: #e74c3c; }
+        .btn-blue { background: #3498db; }
+        .btn-green { background: #2ecc71; }
+        .btn-yellow { background: #f1c40f; color: #333; }
+        .btn-orange { background: #e67e22; }
+        .btn-purple { background: #9b59b6; }
+        
+        .start-screen, .end-screen {
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+        .start-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 50px;
+            font-size: 1.5rem;
+            margin-top: 20px;
+        }
+        .final-score {
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #f1c40f;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="start-screen" id="startScreen">
+            <h1>🎨 Stroop 顏色測試</h1>
+            <p class="subtitle">經典的大腦訓練遊戲</p>
+            <p style="margin-bottom: 20px; line-height: 1.8;">
+                螢幕會顯示一個顏色文字，<br>
+                但文字的<b>顏色</b>同文字意思可能唔同！
+            </p>
+            <p style="color: #ff6b6b; font-weight: bold; margin-bottom: 20px;">
+                請選擇文字既「顏色」，唔係文字既意思！
+            </p>
+            <button class="btn start-btn" onclick="startGame()">開始遊戲</button>
+        </div>
+
+        <div class="game-area hidden" id="gameArea">
+            <h1>Stroop 測試</h1>
+            <div class="score-board">
+                <div class="score-item">分數: <span id="score">0</span></div>
+                <div class="score-item">時間: <span id="time">30</span>s</div>
+            </div>
+            <p class="instructions">揀文字既顏色，唔係文字既意思！</p>
+            <div class="word-display" id="wordDisplay">紅</div>
+            <div class="buttons">
+                <button class="btn btn-red" onclick="answer('red')">紅</button>
+                <button class="btn btn-blue" onclick="answer('blue')">藍</button>
+                <button class="btn btn-green" onclick="answer('green')">綠</button>
+                <button class="btn btn-yellow" onclick="answer('yellow')">黃</button>
+                <button class="btn btn-orange" onclick="answer('orange')">橙</button>
+                <button class="btn btn-purple" onclick="answer('purple')">紫</button>
+            </div>
+        </div>
+
+        <div class="end-screen hidden" id="endScreen">
+            <h1>遊戲結束！</h1>
+            <p>你既分數：</p>
+            <div class="final-score" id="finalScore">0</div>
+            <p id="feedback" style="font-size: 1.2rem; color: #aaa;"></p>
+            <button class="btn start-btn" onclick="startGame()">再玩一次</button>
+        </div>
+    </div>
+
+    <script>
+        const colors = [
+            { name: 'red', chinese: '紅', hex: '#e74c3c' },
+            { name: 'blue', chinese: '藍', hex: '#3498db' },
+            { name: 'green', chinese: '綠', hex: '#2ecc71' },
+            { name: 'yellow', chinese: '黃', hex: '#f1c40f' },
+            { name: 'orange', chinese: '橙', hex: '#e67e22' },
+            { name: 'purple', chinese: '紫', hex: '#9b59b6' }
+        ];
+
+        let score = 0;
+        let timeLeft = 30;
+        let timer;
+        let currentWord = null;
+        let gameActive = false;
+
+        function startGame() {
+            score = 0;
+            timeLeft = 30;
+            gameActive = true;
+            
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('endScreen').classList.add('hidden');
+            document.getElementById('gameArea').classList.remove('hidden');
+            
+            document.getElementById('score').textContent = score;
+            document.getElementById('time').textContent = timeLeft;
+            
+            nextWord();
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('time').textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function nextWord() {
+            // 隨機選擇文字意思
+            const wordColor = colors[Math.floor(Math.random() * colors.length)];
+            // 隨機選擇顯示既顏色（可能同文字意思一樣或唔同）
+            const displayColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            currentWord = displayColor;
+            
+            const display = document.getElementById('wordDisplay');
+            display.textContent = wordColor.chinese;
+            display.style.color = displayColor.hex;
+        }
+
+        function answer(selectedColor) {
+            if (!gameActive) return;
+            
+            const display = document.getElementById('wordDisplay');
+            
+            if (selectedColor === currentWord.name) {
+                score++;
+                document.getElementById('score').textContent = score;
+                nextWord();
+            } else {
+                // 錯誤 - 震動效果
+                display.classList.add('shake');
+                setTimeout(() => display.classList.remove('shake'), 500);
+                score = Math.max(0, score - 1);
+                document.getElementById('score').textContent = score;
+            }
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(timer);
+            
+            document.getElementById('gameArea').classList.add('hidden');
+            document.getElementById('endScreen').classList.remove('hidden');
+            document.getElementById('finalScore').textContent = score;
+            
+            let feedback = '';
+            if (score >= 25) feedback = '勁吖你！反應超快！';
+            else if (score >= 20) feedback = '好叻呀！繼續練習！';
+            else if (score >= 15) feedback = '做得唔錯！再試過！';
+            else if (score >= 10) feedback = '再加油！你得既！';
+            else feedback = '再試多次會更好！';
+            
+            document.getElementById('feedback').textContent = feedback;
+        }
+    </script>
+</body>
+</html>
