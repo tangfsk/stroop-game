@@ -1,13 +1,26 @@
 steps:
-  # 1. 構建 Docker 映像檔
+  # 1. 建立 Docker 映像檔
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'asia-southeast1-docker.pkg.dev/$PROJECT_ID/stroop-game/stroop:$COMMIT_SHA', '.']
+    args: [
+      'build', 
+      '-t', 'asia-southeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/stroop-game/stroop-mind-gym:$COMMIT_SHA', 
+      '.'
+    ]
 
-  # 2. 推送映像檔
+  # 2. 推送至 Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'asia-southeast1-docker.pkg.dev/$PROJECT_ID/stroop-game/stroop:$COMMIT_SHA']
+    args: [
+      'push', 
+      'asia-southeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/stroop-game/stroop-mind-gym:$COMMIT_SHA'
+    ]
 
-  # 3. 部署到 Cloud Run
+  # 3. 部署至 Cloud Run (新增了 --port=80 確保 Nginx 順利接收流量)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'gcloud'
-    args: ['run', 'deploy', 'stroop-game', '--image', 'asia-southeast1-docker.pkg.dev/$PROJECT_ID/stroop-game/stroop:$COMMIT_SHA', '--region', 'asia-southeast1', '--allow-unauthenticated']
+    args: [
+      'run', 'deploy', 'stroop-mind-gym',
+      '--image', 'asia-southeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/stroop-game/stroop-mind-gym:$COMMIT_SHA',
+      '--region', 'asia-southeast1',
+      '--port', '80',
+      '--allow-unauthenticated'
+    ]
